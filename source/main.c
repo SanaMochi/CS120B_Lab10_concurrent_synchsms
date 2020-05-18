@@ -13,13 +13,16 @@
 #include "../header/timer.h"
 #endif
 
-typedef struct task{
+typedef struct Task{
 	int state;
 	unsigned long period;
 	unsigned long elapsedTime;
 	int (*TickFct)(int);
 } task;
 
+//unsigned char V = 4;
+//task tasks[V];
+//const unsigned short tasksNum = V;
 task TL_task;
 task BL_task;
 task S_task;
@@ -82,7 +85,7 @@ enum sound_States {S_SMStart, beep, off};
 int TickFct_Beep(int state) {
 	switch (state) {
 		case S_SMStart:
-			sound = 0x00;
+			sound = beep;
 			break;
 		case beep:
 			state = off;
@@ -97,7 +100,7 @@ int TickFct_Beep(int state) {
 	switch (state) {
 		case S_SMStart: break;
 		case beep:
-			sound = 0x10;
+			if (A) sound = 0x10; // for some reason sets sound to 1 (and lit up led) so << 4 in output
 			break;
 		case off:
 			sound = 0x00;
@@ -123,7 +126,7 @@ int TickFct_Output(int state) {
 	switch (state) {
 		case OUT_SMStart: break;
 		case output:
-			if (A) PORTB = threeLEDs | blinkingLED | sound;
+			if (A) PORTB = threeLEDs | blinkingLED | (sound << 4);
 			else PORTB = threeLEDs | blinkingLED;
 			break;
 		default: break;
@@ -169,7 +172,7 @@ int main(void) {
 			TL_task.elapsedTime = 0;
 		}
 //		if (S_task.elapsedTime >= S_task.period) {
-		if (A) S_task.state = S_task.TickFct(S_task.state);
+		S_task.state = S_task.TickFct(S_task.state);
 //			S_task.elapsedTime = 0;
 //		}
 		if (output_task.elapsedTime >= output_task.period) {
