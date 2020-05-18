@@ -22,10 +22,13 @@ typedef struct task{
 
 task TL_task;
 task BL_task;
+task S_task;
 task output_task;
-const unsigned short timerPeriod = 0x12C;
+unsigned char A;
+const unsigned short timerPeriod = 0x002;
 unsigned char threeLEDs;
 unsigned char blinkingLED;
+unsigned char sound;
 
 enum TL_States{TL_SMStart, inc};
 int TickFct_ThreeLeds(int state) {
@@ -75,6 +78,35 @@ int TickFct_BlinkLed(int state) {
 	return state;
 }
 
+enum sound_States {S_SMStart, beep, off};
+int TickFct_Beep(int state) {
+	switch (state) {
+		case S_SMStart:
+			sound = 0x00;
+			break;
+		case beep:
+			state = off;
+			break;
+		case off:
+			state = beep;
+			break;
+		default: 
+			state = S_SMStart;
+			break;
+	}
+	switch (state) {
+		case S_SMStart: break;
+		case beep:
+			sound = 0x10;
+			break;
+		case off:
+			sound = 0x00;
+			break;
+		default: break;
+	}
+	return state;
+}
+
 enum output {OUT_SMStart, output};
 int TickFct_Output(int state) {
 	switch(state) {
@@ -91,7 +123,8 @@ int TickFct_Output(int state) {
 	switch (state) {
 		case OUT_SMStart: break;
 		case output:
-			PORTB = threeLEDs | blinkingLED;
+			if (A) PORTB = threeLEDs | blinkingLED | sound;
+			else PORTB = threeLEDs | blinkingLED;
 			break;
 		default: break;
 	}
@@ -99,9 +132,9 @@ int TickFct_Output(int state) {
 }
 
 int main(void) {
+	DDRA = 0x00; PORTA = 0xFF;
 	DDRB = 0xFF; PORTB = 0x00;
 
-//	unsigned char i = 0;
 	BL_task.state = BL_SMStart;
 	BL_task.period = 0x3E8;
 	BL_task.elapsedTime= 0;
@@ -112,8 +145,13 @@ int main(void) {
 	TL_task.elapsedTime= 0;
 	TL_task.TickFct = &TickFct_ThreeLeds;
 
+	S_task.state = S_SMStart;
+        S_task.period = 0x002;
+        S_task.elapsedTime= 0;
+        S_task.TickFct = &TickFct_Beep;
+
 	output_task.state = OUT_SMStart;
-	output_task.period = 0x12C;
+	output_task.period = 0x002;
 	output_task.elapsedTime = 0;
 	output_task.TickFct = &TickFct_Output;
 
@@ -121,6 +159,7 @@ int main(void) {
 	TimerOn();
 
     	while (1) {
+		A = ~PINA & 0x01;
 		if (BL_task.elapsedTime >= BL_task.period) {
 			BL_task.state = BL_task.TickFct(BL_task.state);
 			BL_task.elapsedTime = 0;
@@ -129,6 +168,10 @@ int main(void) {
 			TL_task.state = TL_task.TickFct(TL_task.state);
 			TL_task.elapsedTime = 0;
 		}
+//		if (S_task.elapsedTime >= S_task.period) {
+		if (A) S_task.state = S_task.TickFct(S_task.state);
+//			S_task.elapsedTime = 0;
+//		}
 		if (output_task.elapsedTime >= output_task.period) {
 			output_task.state = output_task.TickFct(output_task.state);
 			output_task.elapsedTime = 0;
@@ -137,6 +180,7 @@ int main(void) {
 		TimerFlag = 0;
 		BL_task.elapsedTime += timerPeriod;
 		TL_task.elapsedTime += timerPeriod;
+//		S_task.elapsedTime += timerPeriod;
 		output_task.elapsedTime += timerPeriod;
 	}
     return 1;
