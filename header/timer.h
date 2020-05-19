@@ -2,6 +2,17 @@
 
 volatile unsigned char TimerFlag = 0;
 
+typedef struct Task{
+        int state;
+        unsigned long period;
+        unsigned long elapsedTime;
+        int (*TickFct)(int);
+} task;
+
+#define V 4
+task tasks[V];
+const unsigned short tasksNum = V;
+
 //Internal variables for mapping AVR's ISR to our cleaner TimerISR model.
 unsigned long _avr_timer_M = 1; // Start count from here, down to 0. Default 1 ms/
 unsigned long _avr_timer_cntcurr = 0; // Current internal count of 1 ms ticks
@@ -39,14 +50,14 @@ void TimerOff() {
 }
 
 void TimerISR() {
-/*	unsigned char l;
-	for (l = 0; l < tasksNum; i++) {
+	unsigned char i;
+	for (i = 0; i < tasksNum; i++) {
 		if (tasks[i].elapsedTime >= tasks[i].period){
 			tasks[i].state = tasks[i].TickFct(tasks[i].state);
 			tasks[i].elapsedTime = 0;
 		}
-		tasks[i].elapsedTime += tasksPeriod;
-*/	TimerFlag = 1;
+		tasks[i].elapsedTime += tasks[i].period;
+//	TimerFlag = 1;
 }
 
 ISR(TIMER1_COMPA_vect) {

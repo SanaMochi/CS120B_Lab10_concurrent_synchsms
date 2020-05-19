@@ -12,21 +12,17 @@
 #include "simAVRHeader.h"
 #include "../header/timer.h"
 #endif
-
+/*
 typedef struct Task{
 	int state;
 	unsigned long period;
 	unsigned long elapsedTime;
 	int (*TickFct)(int);
 } task;
-
-#define V 4
-task tasks[V];
-const unsigned short tasksNum = V;
-//task TL_task;
-//task BL_task;
-//task S_task;
-//task output_task;
+*/
+//#define V 4
+//task tasks[V];
+//const unsigned short tasksNum = V;
 unsigned char A;
 const unsigned short timerPeriod = 0x002;
 unsigned char threeLEDs;
@@ -165,7 +161,7 @@ int main(void) {
 
     	while (1) {
 		A = (~PINA >> 2)  & 0x01;
-		if (tasks[0].elapsedTime >= tasks[0].period) {
+/*		if (tasks[0].elapsedTime >= tasks[0].period) {
 			tasks[0].state = tasks[0].TickFct(tasks[0].state);
 			tasks[0].elapsedTime = 0;
 		}
@@ -181,12 +177,12 @@ int main(void) {
 			tasks[3].state = tasks[3].TickFct(tasks[3].state);
 			tasks[3].elapsedTime = 0;
 		}
-		while(!TimerFlag) {}
-		TimerFlag = 0;
+//		while(!TimerFlag) {}
+//		TimerFlag = 0;
 		tasks[0].elapsedTime += timerPeriod;
 		tasks[1].elapsedTime += timerPeriod;
 //		tasks[2].elapsedTime += timerPeriod;
 		tasks[3].elapsedTime += timerPeriod;
-	}
+*/	}
     return 1;
 }
