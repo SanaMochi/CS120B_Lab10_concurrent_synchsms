@@ -24,7 +24,7 @@ typedef struct Task{
 //task tasks[V];
 //const unsigned short tasksNum = V;
 unsigned char A;
-const unsigned short timerPeriod = 0x002;
+//const unsigned short timerPeriod = 0x002;
 unsigned char threeLEDs;
 unsigned char blinkingLED;
 unsigned char sound;
@@ -138,22 +138,22 @@ int main(void) {
 
 	tasks[i].state = BL_SMStart;
 	tasks[i].period = 0x3E8;
-	tasks[i].elapsedTime = 0;
+	tasks[i].elapsedTime = tasks[i].period;
 	tasks[i].TickFct = &TickFct_BlinkLed;
 	i++;
 	tasks[i].state = TL_SMStart;
 	tasks[i].period = 0x12C;
-	tasks[i].elapsedTime= 0;
+	tasks[i].elapsedTime= tasks[i].period;
 	tasks[i].TickFct = &TickFct_ThreeLeds;
 	i++;
 	tasks[i].state = S_SMStart;
         tasks[i].period = 0x002;
-        tasks[i].elapsedTime= 0;
+        tasks[i].elapsedTime= tasks[i].period;
         tasks[i].TickFct = &TickFct_Beep;
 	i++;
 	tasks[i].state = OUT_SMStart;
 	tasks[i].period = 0x002;
-	tasks[i].elapsedTime = 0;
+	tasks[i].elapsedTime = tasks[i].period;
 	tasks[i].TickFct = &TickFct_Output;
 
 	TimerSet(timerPeriod);

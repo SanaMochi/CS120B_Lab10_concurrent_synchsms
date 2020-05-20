@@ -12,6 +12,7 @@ typedef struct Task{
 #define V 4
 task tasks[V];
 const unsigned short tasksNum = V;
+const unsigned short timerPeriod = 0x002;
 
 //Internal variables for mapping AVR's ISR to our cleaner TimerISR model.
 unsigned long _avr_timer_M = 1; // Start count from here, down to 0. Default 1 ms/
@@ -52,11 +53,12 @@ void TimerOff() {
 void TimerISR() {
 	unsigned char i;
 	for (i = 0; i < tasksNum; i++) {
-		if (tasks[i].elapsedTime >= tasks[i].period){
+		if (tasks[i].elapsedTime >= tasks[i].period) {
 			tasks[i].state = tasks[i].TickFct(tasks[i].state);
 			tasks[i].elapsedTime = 0;
 		}
-		tasks[i].elapsedTime += tasks[i].period;
+		tasks[i].elapsedTime += timerPeriod;
+	}
 //	TimerFlag = 1;
 }
 
