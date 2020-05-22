@@ -80,7 +80,7 @@ int TickFct_Freq(int state) {
 			else if ((A & 0x03) == 0x01) state = dec_freq;
 			else state = wait;
 			break;
-		case inc_freq:
+		case inc_freq: 
 			state = incFall;
 			break;
 		case incFall: 
@@ -116,26 +116,20 @@ int TickFct_Freq(int state) {
 	return state;
 }
 
-enum sound_States {S_SMStart, beep, no_beep, off};
+enum sound_States {S_SMStart, beep, off};
 int TickFct_Beep(int state) {
 	switch (state) {
 		case S_SMStart:
-			cnt = 0;
+//			cnt = 0;
 			state = off;
 			break;
 		case beep:
-			if (!A2) state = off;
-			if (A2 && cnt >= frequency) { state = no_beep; cnt = 0;}
-			else state = beep;
-			break;
-		case no_beep:
-			if (!A2) state = off;
-			if (A2 && cnt >= frequency) { state = beep; cnt = 0;}
-			else state = no_beep;
+//			if (cnt >= frequency) { state = off; cnt = 0;}
+			state = off;
 			break;
 		case off:
 			if (A2) { state = beep; }// cnt = 0;}
-			else state = off;
+			state = off;
 			break;
 		default: 
 			state = S_SMStart;
@@ -145,15 +139,11 @@ int TickFct_Beep(int state) {
 		case S_SMStart: break;
 		case beep:
 			sound = 0x10;
-			cnt++;
-			break;
-		case no_beep:
-			sound = 0x00;
-			cnt++;
+//			cnt++;
 			break;
 		case off:
 			sound = 0x00;
-			cnt++;
+//			cnt++;
 			break;
 		default: break;
 	}

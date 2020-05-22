@@ -86,7 +86,7 @@ int TickFct_Beep(int state) {
 	switch (state) {
 		case S_SMStart: break;
 		case beep:
-			sound = 0x10; // for some reason sets sound to 1 (and lit up led) so << 4 in output
+			sound = 0x10; 
 			break;
 		case off:
 			sound = 0x00;
