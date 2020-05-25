@@ -12,7 +12,7 @@
 #include "simAVRHeader.h"
 #include "../header/timer.h"
 #endif
-
+/*
 typedef struct task{
 	int state;
 	unsigned long period;
@@ -23,7 +23,8 @@ typedef struct task{
 task TL_task;
 task BL_task;
 task output_task;
-const unsigned short timerPeriod = 0x3E8;
+*/
+//const unsigned short timerPeriod = 0x3E8;
 unsigned char threeLEDs;
 unsigned char blinkingLED;
 
@@ -102,33 +103,35 @@ int TickFct_Output(int state) {
 int main(void) {
 	DDRB = 0xFF; PORTB = 0x00;
 
+	unsigned char i = 0x00;
+
 //	unsigned char i = 0;
-	BL_task.state = BL_SMStart;
-	BL_task.period = 0x3E8;
-	BL_task.elapsedTime= 0;
-	BL_task.TickFct = &TickFct_BlinkLed;
-
-	TL_task.state = TL_SMStart;
-	TL_task.period = 0x3E8;
-	TL_task.elapsedTime= 0;
-	TL_task.TickFct = &TickFct_ThreeLeds;
-
-	output_task.state = OUT_SMStart;
-	output_task.period = 0x3E8;
-	output_task.elapsedTime = 0;
-	output_task.TickFct = &TickFct_Output;
+	tasks[i].state = BL_SMStart;
+	tasks[i].period = 0x3E8;
+	tasks[i].elapsedTime= 0;
+	tasks[i].TickFct = &TickFct_BlinkLed;
+	i++;
+	tasks[i].state = TL_SMStart;
+	tasks[i].period = 0x3E8;
+	tasks[i].elapsedTime= 0;
+	tasks[i].TickFct = &TickFct_ThreeLeds;
+	i++;
+	tasks[i].state = OUT_SMStart;
+	tasks[i].period = 0x3E8;
+	tasks[i].elapsedTime = 0;
+	tasks[i].TickFct = &TickFct_Output;
 
 	TimerSet(timerPeriod);
 	TimerOn();
 
     	while (1) {
-		BL_task.state = BL_task.TickFct(BL_task.state);
+//		BL_task.state = BL_task.TickFct(BL_task.state);
 //		BL_task.elapsedTime = 0;
-		TL_task.state = TL_task.TickFct(TL_task.state);
+//		TL_task.state = TL_task.TickFct(TL_task.state);
 //		TL_task.elapsedTime = 0;
-		output_task.state = output_task.TickFct(output_task.state);
-		while(!TimerFlag) {}
-		TimerFlag = 0;
+//		output_task.state = output_task.TickFct(output_task.state);
+//		while(!TimerFlag) {}
+//		TimerFlag = 0;
 //		BL_task.elapsedTime += timerPeriod;
 //		TL_task.elapsedTime += timerPeriod;
 	}

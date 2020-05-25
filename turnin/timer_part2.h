@@ -9,13 +9,13 @@ typedef struct Task{
         int (*TickFct)(int);
 } task;
 
-#define V 4	// for part 3
-//#define V 3	// for part 1 & 2
+//#define V 4	// for part 3
+#define V 3	// for part 1 & 2
 task tasks[V];
 const unsigned short tasksNum = V;
-const unsigned short timerPeriod = 0x002; //for part 3
+//const unsigned short timerPeriod = 0x002; //for part 3
 //const unsigned short timerPeriod = 0x3E8; //for part 1
-//const unsigned short timerPeriod = 0x12C;// for part 2
+const unsigned short timerPeriod = 0x12C;// for part 2
 unsigned char frequency;
 
 //Internal variables for mapping AVR's ISR to our cleaner TimerISR model.

@@ -1,7 +1,7 @@
 /*	Author: sana
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #10  Exercise #4
+ *	Assignment: Lab #10  Exercise #3
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -13,13 +13,10 @@
 #include "../header/timer.h"
 #endif
 
-unsigned char A2;
 unsigned char A;
 unsigned char threeLEDs;
 unsigned char blinkingLED;
-unsigned char sound = 0x00;
-unsigned char frequency;
-unsigned char cnt = 0x00;
+unsigned char sound;
 
 enum TL_States{TL_SMStart, inc};
 int TickFct_ThreeLeds(int state) {
@@ -69,71 +66,19 @@ int TickFct_BlinkLed(int state) {
 	}
 	return state;
 }
-/*
-enum frequency_States {F_SMStart, wait, inc_freq, incFall, dec_freq, decFall};
-int TickFct_Freq(int state) {
-	switch (state) {
-		case F_SMStart:
-			state = wait;
-			break;
-		case wait:
-			if ((A & 0x03) == 0x02) state = inc;
-			else if ((A & 0x03) == 0x01) state = dec_freq;
-			else state = wait;
-			break;
-		case inc_freq:
-			state = incFall;
-			break;
-		case incFall: 
-			if ((A & 0x03) == 0x02) state = incFall;
-			else state = wait;
-			break;
-		case dec_freq: 
-			state = decFall;
-			break;
-		case decFall: 
-			if ((A & 0x03) == 0x01) state = decFall;
-			else state = wait;
-			break;
-		default: 
-			state = F_SMStart;
-			break;
-	}
-	switch (state) {
-                case F_SMStart: break;
-                case wait: break;
-		case inc_freq: 
-			frequency++;
-			break;
-		case incFall: break;
-		case dec_freq: 
-			if (frequency > 1) frequency--;
-			break;
-		case decFall: break;
-		default: break;
-        }
-	return state;
-}
-*/
-enum sound_States {S_SMStart, off, beep, no_beep};
+
+enum sound_States {S_SMStart, beep, off};
 int TickFct_Beep(int state) {
 	switch (state) {
 		case S_SMStart:
 			state = off;
 			break;
-		case off:
-			if (A2) {state = beep;}
-			else state = off;
-			break;
 		case beep:
-			if (!A2) state = off;
-			if (A2) { state = no_beep;}
-			else state = beep;
+			state = off;
 			break;
-		case no_beep:
-			if (!A2) state = off;
-			if (A2) { state = beep;}
-			else state = no_beep;
+		case off:
+			if (A) { state = beep;}
+			else state = off;
 			break;
 		default: 
 			state = S_SMStart;
@@ -141,15 +86,10 @@ int TickFct_Beep(int state) {
 	}
 	switch (state) {
 		case S_SMStart: break;
-		case off:
-			if ((A & 0x03) == 0x02) {tasks[2].period++; tasks[3].period++;}
-			else if ((A & 0x03) == 0x01) {tasks[2].period--; tasks[3].period--;}
-			sound = 0x00;
-			break;
 		case beep:
-			sound = 0x10;
+			sound = 0x10; 
 			break;
-		case no_beep:
+		case off:
 			sound = 0x00;
 			break;
 		default: break;
@@ -173,7 +113,8 @@ int TickFct_Output(int state) {
 	switch (state) {
 		case OUT_SMStart: break;
 		case output:
-			PORTB = threeLEDs | blinkingLED | sound;
+			if (A) PORTB = threeLEDs | blinkingLED | sound;
+			else PORTB = threeLEDs | blinkingLED;
 			break;
 		default: break;
 	}
@@ -183,9 +124,6 @@ int TickFct_Output(int state) {
 int main(void) {
 	DDRA = 0x00; PORTA = 0xFF;
 	DDRB = 0xFF; PORTB = 0x00;
-
-//	cnt = 0;
-//	frequency = 1;
 
 	unsigned char i = 0x00;
 
@@ -199,18 +137,13 @@ int main(void) {
 	tasks[i].elapsedTime= tasks[i].period;
 	tasks[i].TickFct = &TickFct_ThreeLeds;
 	i++;
-/*        tasks[i].state = F_SMStart;
-        tasks[i].period = 0x001;
-        tasks[i].elapsedTime= tasks[i].period;
-        tasks[i].TickFct = &TickFct_Beep;
-	i++;
-*/	tasks[i].state = S_SMStart;
-        tasks[i].period = 0x001; //frequency + 1;
+	tasks[i].state = S_SMStart;
+        tasks[i].period = 0x002;
         tasks[i].elapsedTime= tasks[i].period;
         tasks[i].TickFct = &TickFct_Beep;
 	i++;
 	tasks[i].state = OUT_SMStart;
-	tasks[i].period = 0x001; //frequency + 1;
+	tasks[i].period = 0x002;
 	tasks[i].elapsedTime = tasks[i].period;
 	tasks[i].TickFct = &TickFct_Output;
 
@@ -218,8 +151,7 @@ int main(void) {
 	TimerOn();
 
     	while (1) {
-		A = ~PINA & 0x17;
-		A2 = (A >> 2);
+		A = (~PINA >> 2)  & 0x01;
 	}
     return 1;
 }

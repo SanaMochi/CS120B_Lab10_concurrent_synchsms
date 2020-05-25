@@ -113,7 +113,7 @@ int TickFct_Output(int state) {
 	switch (state) {
 		case OUT_SMStart: break;
 		case output:
-			if (A) PORTB = threeLEDs | blinkingLED | (sound);
+			if (A) PORTB = threeLEDs | blinkingLED | sound;
 			else PORTB = threeLEDs | blinkingLED;
 			break;
 		default: break;
