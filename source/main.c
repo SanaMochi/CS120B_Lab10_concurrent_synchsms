@@ -1,7 +1,7 @@
 /*	Author: sana
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #10  Exercise #3
+ *	Assignment: Lab #10  Exercise #4
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -13,10 +13,11 @@
 #include "../header/timer.h"
 #endif
 
+unsigned char A2;
 unsigned char A;
 unsigned char threeLEDs;
 unsigned char blinkingLED;
-unsigned char sound;
+unsigned char sound = 0x00;
 
 enum TL_States{TL_SMStart, inc};
 int TickFct_ThreeLeds(int state) {
@@ -67,18 +68,23 @@ int TickFct_BlinkLed(int state) {
 	return state;
 }
 
-enum sound_States {S_SMStart, beep, off};
+enum sound_States {S_SMStart, off, beep, no_beep};
 int TickFct_Beep(int state) {
 	switch (state) {
 		case S_SMStart:
 			state = off;
 			break;
-		case beep:
-			state = off;
-			break;
 		case off:
-			if (A) { state = beep;}
+			if (A2) {state = beep;}
 			else state = off;
+			break;
+		case beep:
+			if (!A2) state = off;
+			else  state = no_beep;
+			break;
+		case no_beep:
+			if (!A2) state = off;
+			else state = beep;
 			break;
 		default: 
 			state = S_SMStart;
@@ -86,11 +92,26 @@ int TickFct_Beep(int state) {
 	}
 	switch (state) {
 		case S_SMStart: break;
-		case beep:
-			sound = 0x10; 
-			break;
 		case off:
 			sound = 0x00;
+			if ((A & 0x03) == 0x02) tasks[2].period++;
+                        else if ((A & 0x03) == 0x01) {
+                                if (tasks[2].period > 1) tasks[2].period--;
+                        }
+			break;
+		case beep:
+			sound = 0x10;
+			if ((A & 0x03) == 0x02) tasks[2].period++;
+                        else if ((A & 0x03) == 0x01) {
+                                if (tasks[2].period >1) tasks[2].period--;
+                        }
+			break;
+		case no_beep:
+			sound = 0x00;
+			if ((A & 0x03) == 0x02) tasks[2].period++;
+                        else if ((A & 0x03) == 0x01) {
+                                if (tasks[2].period >1) tasks[2].period--;
+                        }
 			break;
 		default: break;
 	}
@@ -113,7 +134,7 @@ int TickFct_Output(int state) {
 	switch (state) {
 		case OUT_SMStart: break;
 		case output:
-			if (A) PORTB = threeLEDs | blinkingLED | sound;
+			if (A2) PORTB = threeLEDs | blinkingLED | sound;
 			else PORTB = threeLEDs | blinkingLED;
 			break;
 		default: break;
@@ -138,12 +159,12 @@ int main(void) {
 	tasks[i].TickFct = &TickFct_ThreeLeds;
 	i++;
 	tasks[i].state = S_SMStart;
-        tasks[i].period = 0x002;
+        tasks[i].period = 0x001;
         tasks[i].elapsedTime= tasks[i].period;
         tasks[i].TickFct = &TickFct_Beep;
 	i++;
 	tasks[i].state = OUT_SMStart;
-	tasks[i].period = 0x002;
+	tasks[i].period = 0x001;
 	tasks[i].elapsedTime = tasks[i].period;
 	tasks[i].TickFct = &TickFct_Output;
 
@@ -151,7 +172,8 @@ int main(void) {
 	TimerOn();
 
     	while (1) {
-		A = (~PINA >> 2)  & 0x01;
+		A = ~PINA & 0x07;
+		A2 = (A >> 2);
 	}
     return 1;
 }
