@@ -56,6 +56,7 @@ int TickFct_BlinkLed(int state) {
 			break;
 		case blink:
 			state = blink;
+			break;
 		default: break;
 	}
 	switch (state) {
@@ -80,7 +81,7 @@ int TickFct_Freq(int state) {
 			else if ((A & 0x03) == 0x01) state = dec_freq;
 			else state = wait;
 			break;
-		case inc_freq: 
+		case inc_freq:
 			state = incFall;
 			break;
 		case incFall: 
@@ -103,12 +104,10 @@ int TickFct_Freq(int state) {
                 case wait: break;
 		case inc_freq: 
 			frequency++;
-//			tasks[3].period = frequency;
 			break;
 		case incFall: break;
 		case dec_freq: 
 			if (frequency > 1) frequency--;
-//			tasks[3].period = frequency;
 			break;
 		case decFall: break;
 		default: break;
@@ -116,20 +115,26 @@ int TickFct_Freq(int state) {
 	return state;
 }
 
-enum sound_States {S_SMStart, beep, off};
+enum sound_States {S_SMStart, off, beep, no_beep};
 int TickFct_Beep(int state) {
 	switch (state) {
 		case S_SMStart:
-//			cnt = 0;
-			state = off;
-			break;
-		case beep:
-//			if (cnt >= frequency) { state = off; cnt = 0;}
+			cnt = 0;
 			state = off;
 			break;
 		case off:
-			if (A2) { state = beep; }// cnt = 0;}
-			state = off;
+			if (A2) {state = beep;}
+			else state = off;
+			break;
+		case beep:
+			if (!A2) state = off;
+			if (A2 && cnt >= frequency) { state = no_beep; cnt = 0;}
+			else state = beep;
+			break;
+		case no_beep:
+			if (!A2) state = off;
+			if (A2 && cnt >= frequency) { state = beep; cnt = 0;}
+			else state = no_beep;
 			break;
 		default: 
 			state = S_SMStart;
@@ -137,13 +142,17 @@ int TickFct_Beep(int state) {
 	}
 	switch (state) {
 		case S_SMStart: break;
-		case beep:
-			sound = 0x10;
-//			cnt++;
-			break;
 		case off:
 			sound = 0x00;
-//			cnt++;
+			cnt = 0x00;
+			break;
+		case beep:
+			sound = 0x10;
+			cnt++;
+			break;
+		case no_beep:
+			sound = 0x00;
+			cnt++;
 			break;
 		default: break;
 	}
@@ -166,7 +175,7 @@ int TickFct_Output(int state) {
 	switch (state) {
 		case OUT_SMStart: break;
 		case output:
-			PORTB = threeLEDs | blinkingLED | (sound);
+			PORTB = threeLEDs | blinkingLED | sound;
 			break;
 		default: break;
 	}
@@ -178,7 +187,7 @@ int main(void) {
 	DDRB = 0xFF; PORTB = 0x00;
 
 	cnt = 0;
-	frequency = 1;
+	frequency = 0;
 
 	unsigned char i = 0x00;
 

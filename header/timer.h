@@ -9,8 +9,8 @@ typedef struct Task{
         int (*TickFct)(int);
 } task;
 
-//#define V 4	// for part 3
-#define V 5	// for part 4
+#define V 4	// for part 3
+//#define V 5	// for part 4
 task tasks[V];
 const unsigned short tasksNum = V;
 const unsigned short timerPeriod = 0x002;

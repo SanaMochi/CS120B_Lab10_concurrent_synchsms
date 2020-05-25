@@ -62,6 +62,7 @@ int TickFct_BlinkLed(int state) {
 			break;
 		case blink:
 			state = blink;
+			break;
 		default: break;
 	}
 	switch (state) {
